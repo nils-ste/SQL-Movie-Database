@@ -1,5 +1,5 @@
 import random
-import movie_storage_sql as storage
+from movie_storage import movie_storage_sql as storage
 import statistics
 import requests
 
@@ -53,19 +53,20 @@ def command_add_movie():
             is_new_title_valid = False
 
     if is_new_title_valid:
-        url = f"https://www.omdbapi.com/?i=tt3896198&apikey=841017c3&t={title}"
-        response = requests.get(url)
-        if response.status_code != 200:
-            print("Something went wrong")
-            return
-        data = response.json()
-        year = data["Year"]
-        rating = data["imdbRating"]
-        poster = data["Poster"]
+        try:
+            url = f"https://www.omdbapi.com/?i=tt3896198&apikey=841017c3&t={title}"
+            response = requests.get(url)
+            if response.status_code != 200:
+                print("Something went wrong")
+                return
+            data = response.json()
+            year = data["Year"]
+            rating = data["imdbRating"]
+            poster = data["Poster"]
 
-
-
-        storage.add_movie(title, year, rating, poster)
+            storage.add_movie(title, year, rating, poster)
+        except Exception as e:
+            print("We can't find this movie in the imDB Database, please try again later")
 
 
 def command_delete_movie():
@@ -174,12 +175,11 @@ def command_search_movie():
         else:
             print("Wrong input. Please try again.")
 
-
     for movie, info in movies.items():
         if query.lower() in movie.lower():
             print(
-                f"Title: {movie['title']}, Released: {movie['year']},"
-                f"IMDB Rating {movie['rating']}"
+                f"Title: {movie}, Released: {info['year']},"
+                f"IMDB Rating {info['rating']}"
             )
             break
 
@@ -202,17 +202,21 @@ def command_rating_list():
             f"Title: {title}, Released: {info['year']}, "
             f"IMDB Rating {info['rating']}"
         )
+
 def command_generate_website():
     """generates a website from the database"""
     movies = storage.list_movies()
     with open("_static/index_template.html", "r") as index_template:
         template = index_template.read()
+
     list_element = ""
     for movie, info in movies.items():
         list_element +=  f'<li> <div class="movie"><img class="movie-poster" src={info["poster"]}><div class="movie-title">{movie}</div><div class="movie-year">{info["year"]}</div></div> </li>'
     template = template.replace("__TEMPLATE_MOVIE_GRID__", list_element)
-    with open("index.html", "w") as index:
+
+    with open("data/index.html", "w") as index:
         index.write(template)
+
     print("\nWebsite was generated successfully.")
 
 
