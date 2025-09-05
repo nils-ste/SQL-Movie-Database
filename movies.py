@@ -16,10 +16,11 @@ def user_interface():
         "5. Stats\n"
         "6. Random movie\n"
         "7. Search movie\n"
-        "8. Movies sorted by rating"
-    )
-    choice = input("Enter choice (0-8): ")
-    if choice.isdigit() and 0 <= int(choice) <= 8:
+        "8. Movies sorted by rating\n"
+        "9. Generate Website\n"
+        )
+    choice = input("Enter choice (0-9): ")
+    if choice.isdigit() and 0 <= int(choice) <= 9:
         return choice
     else:
         return
@@ -201,6 +202,18 @@ def command_rating_list():
             f"Title: {title}, Released: {info['year']}, "
             f"IMDB Rating {info['rating']}"
         )
+def command_generate_website():
+    """generates a website from the database"""
+    movies = storage.list_movies()
+    with open("_static/index_template.html", "r") as index_template:
+        template = index_template.read()
+    list_element = ""
+    for movie, info in movies.items():
+        list_element +=  f'<li> <div class="movie"><img class="movie-poster" src={info["poster"]}><div class="movie-title">{movie}</div><div class="movie-year">{info["year"]}</div></div> </li>'
+    template = template.replace("__TEMPLATE_MOVIE_GRID__", list_element)
+    with open("index.html", "w") as index:
+        index.write(template)
+    print("\nWebsite was generated successfully.")
 
 
 def main():
@@ -236,6 +249,9 @@ def main():
             input("Press enter to continue...")
         elif user_decision == "8":
             command_rating_list()
+            input("Press enter to continue...")
+        elif user_decision == "9":
+            command_generate_website()
             input("Press enter to continue...")
         else:
             print("\nPlease enter numbers between 0 and 8")
