@@ -1,6 +1,7 @@
 import random
 import movie_storage_sql as storage
 import statistics
+import requests
 
 def user_interface():
     """displays the menu and asks for a input and returns it"""
@@ -51,26 +52,19 @@ def command_add_movie():
             is_new_title_valid = False
 
     if is_new_title_valid:
-        is_rating_valid = False
-        while not is_rating_valid:
-            rating = input("enter movie rating (1-10): ")
-            try:
-                rating = float(rating)
-                if 0 <= rating <= 10:
-                    print("The movie has been added to your database.")
-                    is_rating_valid = True
-                else:
-                    raise ValueError
-            except ValueError:
-                print("Invalid rating. Please try again.")
+        url = f"https://www.omdbapi.com/?i=tt3896198&apikey=841017c3&t={title}"
+        response = requests.get(url)
+        if response.status_code != 200:
+            print("Something went wrong")
+            return
+        data = response.json()
+        year = data["Year"]
+        rating = data["imdbRating"]
+        poster = data["Poster"]
 
-        is_year_valid = False
-        while not is_year_valid:
-            year = input("enter movie year: ")
-            if year.isdigit() and 1895 <= int(year) <= 2025: #first ever movie was made 1895
-                is_year_valid = True
 
-        storage.add_movie(title, year, rating)
+
+        storage.add_movie(title, year, rating, poster)
 
 
 def command_delete_movie():
