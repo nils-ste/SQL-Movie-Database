@@ -41,14 +41,13 @@ def add_movie(title, year, rating, poster):
 def delete_movie(title):
     """Delete a movie from the database."""
     with engine.connect() as connection:
-        try:
-            connection.execute(text("DELETE FROM movies WHERE title = :title"),
-                               {"title": title})
-            connection.commit()
-            print(f"Movie '{title}' deleted successfully.")
-        except Exception as e:
-            print(f"Error: {e}")
-
+        result = connection.execute(text("DELETE FROM movies WHERE title = :title"),
+                           {"title": title})
+        connection.commit()
+        if result.rowcount == 0:
+            print(f"No movie titled {title!r} found.")
+        else:
+            print(f"Deleted {result.rowcount} film titled {title!r}.")
 
 def update_movie(title, rating):
     """Update a movie's rating in the database."""

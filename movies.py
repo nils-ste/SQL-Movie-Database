@@ -88,7 +88,7 @@ def command_update_movie():
     movie_found = False
 
     for movie in movies:
-        if movie.get("title") == movie_name:
+        if movie == movie_name:
             movie_found = True
 
     if movie_found:
